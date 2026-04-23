@@ -35,3 +35,13 @@ class Quest(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
 
     # повторюваність, Boss
+
+
+class Comment(models.Model):
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
