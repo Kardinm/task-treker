@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ quest.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-md-8 mx-auto">
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h3>{{ quest.title }}</h3>
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <span class="badge" style="background-color: {{ quest.skill.color }}">
+                            {{ quest.skill.name }}
+                        </span>
+                        <span class="badge bg-secondary">{{ quest.get_rarity_display }}</span>
+                        <span class="badge bg-{% if quest.priority == 'critical' %}danger{% elif quest.priority == 'high' %}warning text-dark{% else %}info text-dark{% endif %}">
+                            {{ quest.get_priority_display }}
+                        </span>
+                        <span class="badge bg-{% if quest.status == 'completed' %}success{% elif quest.status == 'failed' %}danger{% else %}primary{% endif %}">
+                            {{ quest.get_status_display }}
+                        </span>
+                        {% if quest.is_overdue %}
+                            <span class="badge bg-danger">Прострочено</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="fs-4 fw-bold text-warning">+{{ quest.calculate_xp }} XP</div>
+                </div>
+            </div>
+
+            <p>{{ quest.description|linebreaks }}</p>
+
+            <div class="row text-muted small mb-3">
+                <div class="col-sm-6">
+                    <strong>Створено:</strong> {{ quest.created_at|date:"d.m.Y H:i" }}<br>
+                    <strong>Дедлайн:</strong> {{ quest.deadline|date:"d.m.Y H:i"|default:"Не встановлено" }}
+                </div>
+                <div class="col-sm-6">
+                    <strong>Штраф:</strong> {{ quest.penalty_xp }} XP<br>
+                    <strong>Базова нагорода:</strong> {{ quest.xp_reward }} XP
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                {% if quest.status != 'completed' %}
+                <form method="post" action="{% url 'quest_complete' quest.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Позначити виконаним</button>
+                </form>
+                {% endif %}
+                <a href="{% url 'quest_update' quest.pk %}" class="btn btn-outline-primary">Редагувати</a>
+                <a href="{% url 'quest_delete' quest.pk %}" class="btn btn-outline-danger">Видалити</a>
+                <a href="{% url 'quest_list' %}" class="btn btn-outline-secondary">Назад</a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Коментарі ({{ comments.count }})</h5>
+        </div>
+        <div class="card-body">
+            {% for comment in comments %}
+            <div class="mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ comment.user.username }}</strong>
+                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <p class="mb-0 mt-1">{{ comment.text }}</p>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center">Немає нотаток</p>
+            {% endfor %}
+
+            <form method="post" action="{% url 'add_comment' quest.pk %}" class="mt-3">
+                {% csrf_token %}
+                {{ comment_form.text }}
+                <button type="submit" class="btn btn-primary btn-sm mt-2">Коментувати</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}

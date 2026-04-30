@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Реєстрація{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-lg" style="background-color: var(--bg-card, #16213e);">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="text-light mb-1">Створи</h2>
+                        <p class="text-muted small">Почни</p>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2">
+                        {% for error in form.non_field_errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'register' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label text-light small">Ім'я користувача</label>
+                            <input type="text" name="username" id="id_username" 
+                                   class="form-control bg-dark text-light border-secondary {% if form.username.errors %}is-invalid{% endif %}" 
+                                   placeholder="Введи username" required autofocus>
+                            {% for error in form.username.errors %}
+                                <div class="invalid-feedback small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label text-light small">Пароль</label>
+                            <input type="password" name="password1" id="id_password1" 
+                                   class="form-control bg-dark text-light border-secondary {% if form.password1.errors %}is-invalid{% endif %}" 
+                                   placeholder="Мінімум 8 символів" required>
+                            {% for error in form.password1.errors %}
+                                <div class="invalid-feedback small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password2" class="form-label text-light small">Підтвердження пароля</label>
+                            <input type="password" name="password2" id="id_password2" 
+                                   class="form-control bg-dark text-light border-secondary {% if form.password2.errors %}is-invalid{% endif %}" 
+                                   placeholder="Повтори пароль" required>
+                            {% for error in form.password2.errors %}
+                                <div class="invalid-feedback small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success fw-bold">
+                                Почати
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Вже є акаунт? 
+                            <a href="{% url 'login' %}" class="text-decoration-none" style="color: #e94560;">
+                                Увійти
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

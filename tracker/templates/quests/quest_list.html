@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Квести{% endblock %}
+
+{% block content %}
+<div class="row">
+
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0">Фільтри</h6></div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-2">
+                        <label class="form-label small">Статус</label>
+                        {{ filter_form.status }}
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Пріоритет</label>
+                        {{ filter_form.priority }}
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Навичка</label>
+                        {{ filter_form.skill }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Пошук</label>
+                        {{ filter_form.search }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Застосувати</button>
+                    <a href="{% url 'quest_list' %}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Скинути</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Квести</h4>
+            <a href="{% url 'quest_create' %}" class="btn btn-success btn-sm">Новий квест</a>
+        </div>
+
+        {% for quest in quests %}
+        <div class="card mb-3 border-start border-4
+            {% if quest.rarity == 'legendary' %}border-warning
+            {% elif quest.rarity == 'epic' %}border-purple
+            {% elif quest.rarity == 'rare' %}border-primary
+            {% else %}border-secondary{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="card-title mb-1">{{ quest.title }}</h6>
+                        <p class="text-muted small mb-2">{{ quest.description|truncatewords:15 }}</p>
+                        <span class="badge" style="background-color: {{ quest.skill.color }}">
+                            {{ quest.skill.name }}
+                        </span>
+                        <span class="badge bg-secondary">{{ quest.get_rarity_display }}</span>
+                        <span class="badge bg-{% if quest.priority == 'critical' %}danger{% elif quest.priority == 'high' %}warning text-dark{% else %}info text-dark{% endif %}">
+                            {{ quest.get_priority_display }}
+                        </span>
+                        {% if quest.is_overdue %}
+                            <span class="badge bg-danger">Прострочено</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold text-warning small">+{{ quest.calculate_xp }} XP</div>
+                        {% if quest.deadline %}
+                        <small class="text-muted">{{ quest.deadline|date:"d.m.Y H:i" }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-2 d-flex gap-2">
+                    <a href="{% url 'quest_detail' quest.pk %}" class="btn btn-sm btn-outline-primary">Деталі</a>
+                    {% if quest.status != 'completed' %}
+                    <form method="post" action="{% url 'quest_complete' quest.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">Виконати</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5 text-muted">
+            <p>Квестів не знайдено. <a href="{% url 'quest_create' %}">Створити новий?</a></p>
+        </div>
+        {% endfor %}
+
+        {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Далі</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Вхід{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-lg" style="background-color: var(--bg-card, #16213e);">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="text-light mb-1"></h2>
+                        <p class="text-muted small">Увійди, щоб продовжити</p>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2">
+                        {% for error in form.non_field_errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next|default:'/' }}">
+
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label text-light small">Ім'я користувача</label>
+                            <input type="text" name="username" id="id_username" 
+                                   class="form-control bg-dark text-light border-secondary" 
+                                   placeholder="Введи username" required autofocus>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label text-light small">Пароль</label>
+                            <input type="password" name="password" id="id_password" 
+                                   class="form-control bg-dark text-light border-secondary" 
+                                   placeholder="••••••••" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary fw-bold">
+                                Увійти
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Немає акаунта? 
+                            <a href="{% url 'register' %}" class="text-decoration-none" style="color: #e94560;">
+                                Створити
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

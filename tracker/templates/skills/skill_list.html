@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Мої Навички{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-light">Твої Навички</h2>
+    </div>
+
+    <div class="row g-4">
+        {% for skill in skills %}
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm" 
+                 style="background-color: var(--bg-card, #16213e); 
+                        border-top: 4px solid {{ skill.color }} !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4 class="card-title mb-0" style="color: {{ skill.color }};">
+                            {{ skill.name }}
+                        </h4>
+                        <span class="badge bg-dark border" 
+                              style="border-color: {{ skill.color }} !important; color: {{ skill.color }};">
+                            Lv.{{ skill.level }}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>XP: {{ skill.xp }} / {{ skill.xp_to_next_level }}</span>
+                            <span>{{ skill.xp_percent }}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px; background-color: #2a2a4a;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ skill.xp_percent }}%; background-color: {{ skill.color }};"
+                                 aria-valuenow="{{ skill.xp_percent }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            {{ skill.quests.count }} квестів
+                        </small>
+                        <a href="{% url 'skill_detail' skill.pk %}" class="btn btn-sm btn-outline-light">
+                            Детальніше
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="text-muted">
+                <h4>Немає навичок</h4>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
