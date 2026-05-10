@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Інвентар{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 style="font-size:1rem; margin:0;">Інвентар</h4>
+    <span class="text-dim" style="font-size:.78rem;">
+        Предмети допомагають у реальному житті. 
+    </span>
+</div>
+
+{% if items %}
+<div class="row g-4">
+    {% for item in items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="sq-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    {% if item.item_type == 'focus' %}Концентрація
+                    {% elif item.item_type == 'recovery' %}Відновлення
+                    {% elif item.item_type == 'xp_boost' %}Буст XP
+                    {% else %}Захист{% endif %}
+                </span>
+                <span style="
+                    font-size:.7rem; padding:.2rem .5rem; border-radius:3px;
+                    {% if item.item_type == 'focus' %}color:var(--sky); border:1px solid rgba(56,189,248,.3); background:rgba(56,189,248,.07);
+                    {% elif item.item_type == 'recovery' %}color:var(--emerald); border:1px solid rgba(16,185,129,.3); background:rgba(16,185,129,.07);
+                    {% elif item.item_type == 'xp_boost' %}color:var(--gold); border:1px solid rgba(245,158,11,.3); background:rgba(245,158,11,.07);
+                    {% else %}color:var(--indigo); border:1px solid rgba(99,102,241,.3); background:rgba(99,102,241,.07);
+                    {% endif %}
+                ">
+                    x{{ item.quantity }}
+                </span>
+            </div>
+
+            <div class="p-4 d-flex flex-column gap-3 h-100">
+                <div>
+                    <h5 style="font-size:.95rem; color:var(--text-head); margin-bottom:.5rem;">
+                        {{ item.name }}
+                    </h5>
+                    <p style="font-size:.8rem; color:var(--text); line-height:1.7; margin:0;">
+                        {{ item.description }}
+                    </p>
+                </div>
+
+                {% if item.last_used %}
+                <div class="text-dim" style="font-size:.7rem;">
+                    Останній раз: {{ item.last_used|date:"d.m.Y, H:i" }}
+                </div>
+                {% endif %}
+
+                <div class="mt-auto">
+                    {% if item.quantity > 0 %}
+                    <form method="post" action="{% url 'use_item' item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-sq-primary" style="width:100%;">
+                            Використати
+                        </button>
+                    </form>
+                    {% else %}
+                    <div style="text-align:center; color:var(--text-dim); font-size:.78rem;
+                                border:1px solid var(--border); border-radius:4px; padding:.5rem;">
+                        Вичерпано
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="sq-card p-5 text-center text-dim">
+    Інвентар порожній
+</div>
+{% endif %}
+{% endblock %}

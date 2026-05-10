@@ -1,32 +1,322 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% load static %}{% static 'css/custom.css' %}">
+    <style>
+        :root {
+            --bg:        #080b14;
+            --bg-card:   #0e1220;
+            --bg-hover:  #141826;
+            --border:    #1e2640;
+            --gold:      #f59e0b;
+            --gold-dim:  #92600a;
+            --indigo:    #6366f1;
+            --emerald:   #10b981;
+            --rose:      #f43f5e;
+            --sky:       #38bdf8;
+            --text:      #cbd5e1;
+            --text-dim:  #475569;
+            --text-head: #e2e8f0;
+
+            --r-common:    #64748b;
+            --r-rare:      #3b82f6;
+            --r-epic:      #a855f7;
+            --r-legendary: #f59e0b;
+
+            --p-low:      #10b981;
+            --p-medium:   #38bdf8;
+            --p-high:     #f59e0b;
+            --p-critical: #f43f5e;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            min-height: 100vh;
+            /* subtle grid texture */
+            background-image:
+                linear-gradient(rgba(99,102,241,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        h1, h2, h3, h4, h5, h6,
+        .display-title { font-family: 'Cinzel', serif; color: var(--text-head); letter-spacing: .03em; }
+
+        /* ── Navbar ── */
+        .sq-nav {
+            background: rgba(8,11,20,.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 100;
+            padding: .6rem 0;
+        }
+        .sq-nav .brand {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--gold);
+            text-decoration: none;
+            letter-spacing: .08em;
+        }
+        .sq-nav .brand:hover { color: #fcd34d; }
+        .sq-nav .nav-link {
+            color: var(--text-dim);
+            font-size: .78rem;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: .3rem .75rem;
+            border-radius: 4px;
+            transition: color .2s, background .2s;
+            text-decoration: none;
+        }
+        .sq-nav .nav-link:hover { color: var(--text-head); background: var(--bg-hover); }
+        .sq-nav .player-badge {
+            font-size: .75rem;
+            color: var(--gold);
+            padding: .25rem .6rem;
+            border: 1px solid var(--gold-dim);
+            border-radius: 4px;
+            font-family: 'Cinzel', serif;
+        }
+
+        /* ── Cards ── */
+        .sq-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: border-color .2s, transform .2s;
+        }
+        .sq-card:hover { border-color: #2e3a5e; transform: translateY(-1px); }
+        .sq-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Cinzel', serif;
+            font-size: .8rem;
+            letter-spacing: .06em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            padding: .75rem 1.25rem;
+        }
+
+        /* ── Badges ── */
+        .badge-rarity {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .68rem;
+            padding: .25em .55em;
+            border-radius: 3px;
+            font-weight: 500;
+            letter-spacing: .04em;
+        }
+        .r-common    { background: rgba(100,116,139,.18); color: var(--r-common);    border: 1px solid var(--r-common); }
+        .r-rare      { background: rgba(59,130,246,.12);  color: var(--r-rare);      border: 1px solid var(--r-rare); }
+        .r-epic      { background: rgba(168,85,247,.12);  color: var(--r-epic);      border: 1px solid var(--r-epic); }
+        .r-legendary { background: rgba(245,158,11,.12);  color: var(--r-legendary); border: 1px solid var(--r-legendary);
+                       box-shadow: 0 0 8px rgba(245,158,11,.25); }
+
+        .badge-priority {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .68rem;
+            padding: .25em .55em;
+            border-radius: 3px;
+        }
+        .p-low      { background: rgba(16,185,129,.12); color: var(--p-low);      border: 1px solid var(--p-low); }
+        .p-medium   { background: rgba(56,189,248,.12); color: var(--p-medium);   border: 1px solid var(--p-medium); }
+        .p-high     { background: rgba(245,158,11,.12); color: var(--p-high);     border: 1px solid var(--p-high); }
+        .p-critical { background: rgba(244,63,94,.12);  color: var(--p-critical); border: 1px solid var(--p-critical);
+                      animation: pulse-red 2s infinite; }
+
+        @keyframes pulse-red {
+            0%,100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
+            50%      { box-shadow: 0 0 6px 2px rgba(244,63,94,.3); }
+        }
+
+        /* ── XP Bar ── */
+        .xp-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+            border-radius: 3px;
+            transition: width .6s ease;
+        }
+
+        /* ── Quest cards (left border by rarity) ── */
+        .quest-row {
+            border-left: 3px solid var(--r-common);
+            transition: border-color .2s, background .2s;
+        }
+        .quest-row.r-rare      { border-left-color: var(--r-rare); }
+        .quest-row.r-epic      { border-left-color: var(--r-epic); }
+        .quest-row.r-legendary { border-left-color: var(--r-legendary);
+                                  box-shadow: -4px 0 12px rgba(245,158,11,.15); }
+
+        /* ── Buttons ── */
+        .btn-sq-primary {
+            background: var(--indigo);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            letter-spacing: .05em;
+            padding: .4rem .9rem;
+            transition: background .2s, transform .15s;
+        }
+        .btn-sq-primary:hover { background: #4f52d4; transform: translateY(-1px); color: #fff; }
+
+        .btn-sq-gold {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold-dim);
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            letter-spacing: .05em;
+            padding: .4rem .9rem;
+            transition: background .2s;
+        }
+        .btn-sq-gold:hover { background: rgba(245,158,11,.1); color: var(--gold); }
+
+        .btn-sq-danger {
+            background: transparent;
+            color: var(--rose);
+            border: 1px solid rgba(244,63,94,.4);
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            padding: .4rem .9rem;
+            transition: background .2s;
+        }
+        .btn-sq-danger:hover { background: rgba(244,63,94,.1); color: var(--rose); }
+
+        .btn-sq-ghost {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            padding: .4rem .9rem;
+            transition: color .2s, border-color .2s;
+        }
+        .btn-sq-ghost:hover { color: var(--text-head); border-color: #2e3a5e; }
+
+        /* ── Form controls override ── */
+        .form-control, .form-select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .83rem;
+        }
+        .form-control:focus, .form-select:focus {
+            background: var(--bg-card);
+            border-color: var(--indigo);
+            color: var(--text-head);
+            box-shadow: 0 0 0 2px rgba(99,102,241,.2);
+        }
+        .form-label {
+            font-size: .75rem;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: .3rem;
+        }
+
+        /* ── Note cards ── */
+        .note-card {
+            background: rgba(245,158,11,.04);
+            border: 1px solid rgba(245,158,11,.15);
+            border-radius: 6px;
+            padding: .75rem 1rem;
+            position: relative;
+        }
+        .note-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--gold-dim);
+            border-radius: 3px 0 0 3px;
+        }
+
+        /* ── Boss bar ── */
+        .boss-progress {
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .boss-progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width .6s ease;
+        }
+
+        /* ── Misc ── */
+        .text-gold   { color: var(--gold); }
+        .text-indigo { color: var(--indigo); }
+        .text-dim    { color: var(--text-dim); }
+        .text-rose   { color: var(--rose); }
+        .text-emerald{ color: var(--emerald); }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        a { color: var(--indigo); text-decoration: none; }
+        a:hover { color: #818cf8; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">Головна</a>
-        <div class="navbar-nav ms-auto align-items-center">
-            {% if user.is_authenticated %}
-                <span class="nav-link text-warning">
-                    Lv.{{ user.playerprofile.player_level }}, {{ user.playerprofile.title }}
-                </span>
-                <a class="nav-link" href="{% url 'quest_list' %}">Квести</a>
-                <a class="nav-link" href="{% url 'skill_list' %}">Навички</a>
-                <a class="nav-link" href="{% url 'boss_list' %}">Боси</a>
-                 <!-- <a class="nav-link" href="{% url 'logout' %}">Вийти</a> --> 
-            {% else %}
-                <a class="nav-link" href="{% url 'login' %}">Увійти</a>
-                <a class="nav-link" href="{% url 'register' %}">Реєстрація</a>
-            {% endif %}
+<nav class="sq-nav">
+    <div class="container d-flex align-items-center gap-3 flex-wrap">
+        <a class="brand me-3" href="{% url 'dashboard' %}">Головна</a>
+
+        {% if user.is_authenticated %}
+        <a class="nav-link" href="{% url 'quest_list' %}">Квести</a>
+        <a class="nav-link" href="{% url 'skill_list' %}">Навички</a>
+        <a class="nav-link" href="{% url 'boss_list' %}">Боси</a>
+        <a class="nav-link" href="{% url 'inventory' %}">Інвентар</a>
+
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <span class="player-badge">
+                Lv.{{ user.playerprofile.player_level }} &nbsp;{{ user.playerprofile.title }}
+            </span>
+            <a class="nav-link" href="{% url 'logout' %}">Вийти</a>
         </div>
+        {% else %}
+        <div class="ms-auto d-flex gap-2">
+            <a class="nav-link" href="{% url 'login' %}">Увійти</a>
+            <a class="nav-link" href="{% url 'register' %}">Реєстрація</a>
+        </div>
+        {% endif %}
     </div>
 </nav>
 

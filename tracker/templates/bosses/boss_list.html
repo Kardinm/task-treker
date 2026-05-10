@@ -1,74 +1,91 @@
 {% extends 'base.html' %}
-
 {% block title %}Боси{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="text-light mb-0">Боси та дедлайни</h2>
-        </div>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 style="font-size:1rem; margin:0;">Боси та дедлайни</h4>
+</div>
 
-    <div class="row g-4">
-        {% for boss in bosses %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0" style="background-color: var(--bg-card, #16213e); border: 1px solid #dc3545 !important;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h5 class="card-title text-light mb-0">{{ boss.name }}</h5>
-                        {% if boss.is_ready %}
-                        <span class="badge bg-success">Готовий</span>
-                        {% else %}
-                        <span class="badge bg-danger">Не готовий</span>
-                        {% endif %}
-                    </div>
+<div class="row g-4">
+    {% for boss in bosses %}
+    <div class="col-md-6 col-lg-4">
+        <div class="sq-card h-100" style="
+            border-color: {% if boss.is_ready %}rgba(16,185,129,.35){% else %}rgba(244,63,94,.35){% endif %};
+            {% if not boss.is_ready %}box-shadow: 0 0 20px rgba(244,63,94,.07);{% endif %}
+        ">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Дедлайн</span>
+                <span style="font-size:.7rem;
+                      color:{% if boss.status == 'defeated' %}var(--emerald){% elif boss.status == 'lost' %}var(--rose){% else %}var(--text-dim){% endif %};">
+                    {{ boss.get_status_display }}
+                </span>
+            </div>
 
-                    <p class="text-muted small mb-3">
-                        {{ boss.description|truncatewords:15|default:"Без опису" }}
-                    </p>
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 style="font-size:1rem; color:var(--text-head); margin:0;">{{ boss.name }}</h5>
+                    {% if boss.is_ready %}
+                    <span style="font-size:.7rem; color:var(--emerald); border:1px solid rgba(16,185,129,.3);
+                                 padding:.2rem .5rem; border-radius:3px; white-space:nowrap;">
+                        Готовий
+                    </span>
+                    {% else %}
+                    <span style="font-size:.7rem; color:var(--rose); border:1px solid rgba(244,63,94,.3);
+                                 padding:.2rem .5rem; border-radius:3px; white-space:nowrap;">
+                        Не готовий
+                    </span>
+                    {% endif %}
+                </div>
 
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span class="text-muted">
-                                Навичка: <span style="color: {{ boss.skill.color }};">{{ boss.skill.name }}</span>
-                            </span>
-                            <span class="{% if boss.is_ready %}text-success{% else %}text-danger{% endif %}">
-                                Lv.{{ boss.skill.level }} / {{ boss.min_level }}
-                            </span>
-                        </div>
-                        <div class="progress" style="height: 10px; background-color: #2a2a4a;">
-                            <div class="progress-bar {% if boss.is_ready %}bg-success{% else %}bg-danger{% endif %}" 
-                                 role="progressbar" 
-                                 style="width: {{ boss.level_progress_percent }}%;"
-                                 aria-valuenow="{{ boss.level_progress_percent }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                    </div>
+                {% if boss.description %}
+                <p class="text-dim mb-3" style="font-size:.78rem; line-height:1.6;">
+                    {{ boss.description|truncatewords:20 }}
+                </p>
+                {% endif %}
 
-                    <div class="d-flex justify-content-between align-items-center text-muted small mb-2">
-                        <span>{{ boss.days_left }} днів залишилось</span>
-                        <span class="text-warning">+{{ boss.reward_xp }} XP</span>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-{% if boss.status == 'preparing' %}info{% elif boss.status == 'defeated' %}success{% else %}danger{% endif %}">
-                            {{ boss.get_status_display }}
+                <!-- Навичка + прогрес -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.72rem;">
+                        <span style="color:{{ boss.skill.color }};">{{ boss.skill.name }}</span>
+                        <span class="{% if boss.is_ready %}text-emerald{% else %}text-rose{% endif %}">
+                            Lv.{{ boss.skill.level }} / {{ boss.min_level }}
                         </span>
-                        <small class="text-muted">{{ boss.deadline|date:"d.m.Y H:i" }}</small>
                     </div>
+                    <div class="boss-progress">
+                        <div class="boss-progress-fill"
+                             style="width:{{ boss.level_progress_percent }}%;
+                                    background:{% if boss.is_ready %}var(--emerald){% else %}var(--rose){% endif %};">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Часові рамки -->
+                <div class="d-flex justify-content-between" style="font-size:.72rem;">
+                    <span class="text-dim">{{ boss.deadline|date:"d.m.Y, H:i" }}</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-dim">залишилось</span>
+                        <span style="
+                            color:{% if boss.days_left <= 3 %}var(--rose){% elif boss.days_left <= 7 %}var(--gold){% else %}var(--emerald){% endif %};
+                            font-family:'Cinzel',serif; font-size:.9rem;">
+                            {{ boss.days_left }}
+                        </span>
+                        <span class="text-dim">днів</span>
+                    </div>
+                </div>
+
+                <hr class="divider" style="margin:1rem 0;">
+
+                <div class="d-flex justify-content-between align-items-center" style="font-size:.75rem;">
+                    <span class="text-dim">Нагорода</span>
+                    <span class="text-gold" style="font-family:'Cinzel',serif;">+{{ boss.reward_xp }} XP</span>
                 </div>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5">
-            <div class="text-muted">
-                <h4>Немає босів</h4>
-            </div>
-        </div>
-        {% endfor %}
     </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="sq-card p-5 text-center text-dim">Немає босів</div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

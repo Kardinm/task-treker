@@ -3,6 +3,18 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Avg
 
+
+PLAYER_TITLES = [
+    (1, 'Новачок'),
+    (3, 'Учень'),
+    (5, 'Практикант'),
+    (8, 'Знавець'),
+    (12, 'Майстер'),
+    (18, 'Ветеран'),
+    (25, 'Грандмайстер'),
+]
+
+
 class PlayerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='playerprofile')
     total_xp = models.PositiveIntegerField(default=0)
@@ -10,21 +22,33 @@ class PlayerProfile(models.Model):
     stamina = models.PositiveIntegerField(default=100)
     title = models.CharField(max_length=50, default='Новачок')
 
+
     def update_level(self):
         avg = Skill.objects.filter(user=self.user).aggregate(avg=Avg('level'))['avg']
         self.player_level = max(1, int(avg or 1))
+        self.title = self._compute_title(self.player_level)
         self.save()
+
+
+    def _compute_title(self, level):
+        title = PLAYER_TITLES[0][1]
+        for min_level, name in PLAYER_TITLES:
+            if level >= min_level:
+                title = name
+
+        return title
+
 
     def __str__(self):
         return f'{self.user.username} profile'
-    
+
 
 class Skill(models.Model):
     name = models.CharField(max_length=50)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='skills')
     xp = models.PositiveIntegerField(default=0)
     level = models.PositiveIntegerField(default=1)
-    color = models.CharField(max_length=7, default='#007bff')
+    color = models.CharField(max_length=7, default='#6366f1')
 
     def add_xp(self, amount):
         self.xp += amount
@@ -50,10 +74,10 @@ class Skill(models.Model):
 
 class Quest(models.Model):
     RARITY_CHOICES = [
-        ('common', 'Common'),
-        ('rare', 'Rare'),
-        ('epic', 'Epic'),
-        ('legendary', 'Legendary'),
+        ('common', 'Звичайний'),
+        ('rare', 'Нічогенький'),
+        ('epic', 'Напряжний'),
+        ('legendary', 'Дуже напряжний'),
     ]
     STATUS_CHOICES = [
         ('pending', 'В очікуванні'),
@@ -62,11 +86,14 @@ class Quest(models.Model):
         ('failed', 'Провалено'),
     ]
     PRIORITY_CHOICES = [
-        ('low', 'Низький'),
-        ('medium', 'Середній'),
-        ('high', 'Високий'),
-        ('critical', 'Критичний'),
+        ('low', 'Не треба'),
+        ('medium', 'Бажано'),
+        ('high', 'Треба'),
+        ('critical', 'Або зараз, або ніколи'),
     ]
+    XP_MULTIPLIER = {
+        'common': 1, 'rare': 2, 'epic': 3, 'legendary': 5,
+    }
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quests')
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='quests')
@@ -78,17 +105,10 @@ class Quest(models.Model):
     deadline = models.DateTimeField(null=True, blank=True)
     xp_reward = models.PositiveIntegerField(default=10)
     penalty_xp = models.PositiveIntegerField(default=0)
+    image = models.FileField(upload_to='quests/', blank=True, null=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    image = models.FileField(upload_to='quests/', blank=True, null=True)
-
-    XP_MULTIPLIER = {
-        'common': 1,
-        'rare': 2,
-        'epic': 3,
-        'legendary': 5,
-    }
 
     @property
     def calculate_xp(self):
@@ -107,14 +127,14 @@ class Quest(models.Model):
         ordering = ['-created_at']
 
 
-class Comment(models.Model):
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name='comments')
+class Note(models.Model):
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name='notes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Comment by {self.user.username} on {self.quest}'
+        return f'Note by {self.user.username} on "{self.quest}"'
 
     class Meta:
         ordering = ['-created_at']
@@ -160,16 +180,27 @@ class Boss(models.Model):
 
 class Item(models.Model):
     ITEM_TYPES = [
+        ('focus', 'Концентрація'),
+        ('recovery', 'Відновлення'),
         ('xp_boost', 'Буст XP'),
-        ('stamina', 'Відновлення енергії'),
-        ('shield', 'Захист від штрафу'),
+        ('shield', 'Захист'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='items')
     name = models.CharField(max_length=100)
     item_type = models.CharField(max_length=20, choices=ITEM_TYPES)
+    description = models.TextField(default='')
     effect_value = models.PositiveIntegerField(default=10)
     quantity = models.PositiveIntegerField(default=1)
+    last_used = models.DateTimeField(null=True, blank=True)
+
+    def use(self):
+        if self.quantity > 0:
+            self.quantity -= 1
+            self.last_used = timezone.now()
+            self.save()
+            return True
+        return False
 
     def __str__(self):
         return f'{self.name} x{self.quantity}'

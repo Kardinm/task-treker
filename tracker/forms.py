@@ -1,12 +1,13 @@
 from django import forms
-from .models import Quest, Comment, Skill
+from .models import Quest, Note, Skill
 
 
 class QuestForm(forms.ModelForm):
     class Meta:
         model = Quest
-        fields = ['title', 'description', 'priority', 'rarity', 
-                  'deadline', 'skill', 'penalty_xp', 'image'
+        fields = [
+            'title', 'description', 'priority', 'rarity',
+            'deadline', 'skill', 'penalty_xp', 'image',
         ]
         widgets = {
             'title': forms.TextInput(attrs={
@@ -18,20 +19,19 @@ class QuestForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': 'Опис завдання',
             }),
-            'priority': forms.Select(attrs={'class': 'form-select'}),
-            'rarity': forms.Select(attrs={'class': 'form-select'}),
-            'deadline': forms.DateTimeInput(attrs={
+            'priority':   forms.Select(attrs={'class': 'form-select'}),
+            'rarity':     forms.Select(attrs={'class': 'form-select'}),
+            'deadline':   forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local',
             }),
-            'skill': forms.Select(attrs={'class': 'form-select'}),
+            'skill':      forms.Select(attrs={'class': 'form-select'}),
             'penalty_xp': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Штраф XP за провал',
             }),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
-
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -40,15 +40,15 @@ class QuestForm(forms.ModelForm):
             self.fields['skill'].queryset = Skill.objects.filter(user=user)
 
 
-class CommentForm(forms.ModelForm):
+class NoteForm(forms.ModelForm):
     class Meta:
-        model = Comment
+        model = Note
         fields = ['text']
         widgets = {
             'text': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 2,
-                'placeholder': 'Додати примітку чи коментар',
+                'placeholder': 'Нотатка до квесту...',
             }),
         }
 
@@ -77,7 +77,6 @@ class QuestFilterForm(forms.Form):
             'placeholder': 'Пошук за назвою',
         }),
     )
-
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)

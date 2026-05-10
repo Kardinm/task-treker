@@ -2,19 +2,21 @@
 {% block title %}Видалити квест{% endblock %}
 
 {% block content %}
-<div class="row">
-<div class="col-md-5 mx-auto">
-    <div class="card border-danger">
-        <div class="card-header text-danger">
-            <h5 class="mb-0">Підтвердження видалення</h5>
-        </div>
-        <div class="card-body">
-            <p>Ви впевнені, що хочете видалити квест <strong>{{ quest.title }}</strong>?</p>
+<div class="row justify-content-center">
+<div class="col-md-5">
+    <div class="sq-card" style="border-color:rgba(244,63,94,.35);">
+        <div class="card-header" style="color:var(--rose);">Підтвердження видалення</div>
+        <div class="p-4">
+            <p style="font-size:.85rem; margin-bottom:1.5rem;">
+                Видалити квест <strong style="color:var(--text-head);">{{ quest.title }}</strong>?
+            </p>
             <form method="post">
                 {% csrf_token %}
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-danger">Видалити</button>
-                    <a href="{% url 'quest_detail' quest.pk %}" class="btn btn-outline-secondary">Скасувати</a>
+                    <button type="submit" class="btn-sq-danger" style="flex:1;">Видалити</button>
+                    <a href="{% url 'quest_detail' quest.pk %}" class="btn-sq-ghost" style="flex:1; text-align:center;">
+                        Скасувати
+                    </a>
                 </div>
             </form>
         </div>

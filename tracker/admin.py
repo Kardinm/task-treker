@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Quest, Skill, PlayerProfile, Comment, Boss, Item
+from .models import Quest, Skill, PlayerProfile, Note, Boss, Item
 
 
 @admin.register(Quest)
@@ -23,5 +23,5 @@ class PlayerProfileAdmin(admin.ModelAdmin):
 class BossAdmin(admin.ModelAdmin):
     list_display = ['name', 'user', 'skill', 'min_level', 'deadline', 'status']
 
-admin.site.register(Comment)
+admin.site.register(Note)
 admin.site.register(Item)

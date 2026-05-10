@@ -4,78 +4,110 @@
 {% block content %}
 <div class="row g-4">
 
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h4 class="card-title">{{ user.username }}</h4>
-                <p class="text-muted mb-1">{{ profile.title }}</p>
-                <div class="display-5 fw-bold text-warning">Lv. {{ profile.player_level }}</div>
-                <div class="mt-2">
-                    <small class="text-muted">Загальний XP: {{ profile.total_xp }}</small>
+    <!-- Профіль гравця -->
+    <div class="col-md-3">
+        <div class="sq-card h-100">
+            <div class="card-header">Гравець</div>
+            <div class="p-4 text-center d-flex flex-column gap-3">
+                <div>
+                    <div style="font-family:'Cinzel',serif; font-size:1.1rem; color:var(--text-head);">
+                        {{ user.username }}
+                    </div>
+                    <div class="text-dim" style="font-size:.75rem; text-transform:uppercase; letter-spacing:.08em;">
+                        {{ profile.title }}
+                    </div>
                 </div>
-                <div class="mt-2">
-                    <span class="badge bg-secondary">Stamina: {{ profile.stamina }}/100</span>
+
+                <div>
+                    <div class="text-gold" style="font-family:'Cinzel',serif; font-size:2.5rem; line-height:1;">
+                        {{ profile.player_level }}
+                    </div>
+                    <div class="text-dim" style="font-size:.7rem;">рівень</div>
+                </div>
+
+                <div>
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.72rem;">
+                        <span class="text-dim">Загальний XP</span>
+                        <span class="text-gold">{{ profile.total_xp }}</span>
+                    </div>
+                    <div class="xp-track">
+                        <div class="xp-fill" style="width: {% widthratio profile.total_xp 1000 100 %}%;"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between" style="font-size:.72rem;">
+                    <span class="text-dim">Stamina</span>
+                    <span style="color:var(--emerald);">{{ profile.stamina }}/100</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="card h-100">
+    <!-- Навички -->
+    <div class="col-md-9">
+        <div class="sq-card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Навички</h5>
-                <a href="{% url 'skill_list' %}" class="btn btn-sm btn-outline-secondary">Всі</a>
+                <span>Навички</span>
+                <a href="{% url 'skill_list' %}" class="btn-sq-ghost" style="font-size:.7rem; padding:.2rem .6rem;">Всі</a>
             </div>
-            <div class="card-body">
+            <div class="p-3">
                 <div class="row g-3">
                     {% for skill in skills %}
                     <div class="col-md-4">
-                        <a href="{% url 'skill_detail' skill.pk %}" class="text-decoration-none">
-                            <div class="card h-100" style="border-color: {{ skill.color }}">
-                                <div class="card-body">
-                                    <h6 style="color: {{ skill.color }}">{{ skill.name }}</h6>
-                                    <div class="d-flex justify-content-between">
-                                        <span>Lv. {{ skill.level }}</span>
-                                        <small class="text-muted">{{ skill.xp }}/{{ skill.xp_to_next_level }} XP</small>
-                                    </div>
-                                    <div class="progress mt-2" style="height: 6px;">
-                                        <div class="progress-bar" style="width: {{ boss.level_progress_percent }}%"></div>
-                                    </div>
+                        <a href="{% url 'skill_detail' skill.pk %}" style="text-decoration:none;">
+                            <div class="sq-card p-3" style="border-color: {{ skill.color }}22;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span style="font-family:'Cinzel',serif; color:{{ skill.color }}; font-size:.85rem;">
+                                        {{ skill.name }}
+                                    </span>
+                                    <span style="font-size:.7rem; color:{{ skill.color }}; border:1px solid {{ skill.color }}44; padding:.1rem .4rem; border-radius:3px;">
+                                        Lv.{{ skill.level }}
+                                    </span>
+                                </div>
+                                <div class="xp-track mb-1" style="background:{{ skill.color }}1a;">
+                                    <div class="xp-fill" style="width:{{ skill.xp_percent }}%; background:{{ skill.color }};"></div>
+                                </div>
+                                <div class="text-dim" style="font-size:.68rem;">
+                                    {{ skill.xp }} / {{ skill.xp_to_next_level }} XP
                                 </div>
                             </div>
                         </a>
                     </div>
+                    {% empty %}
+                    <div class="col-12 text-dim text-center py-3" style="font-size:.8rem;">Немає навичок</div>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Активні квести -->
     <div class="col-md-6">
-        <div class="card">
+        <div class="sq-card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Активні квести</h5>
-                <a href="{% url 'quest_create' %}" class="btn btn-sm btn-success">Новий</a>
+                <span>Активні квести</span>
+                <a href="{% url 'quest_create' %}" class="btn-sq-gold" style="font-size:.7rem; padding:.2rem .6rem;">+ Новий</a>
             </div>
-            <div class="list-group list-group-flush">
+            <div class="p-3 d-flex flex-column gap-2">
                 {% for quest in active_quests %}
                 <a href="{% url 'quest_detail' quest.pk %}"
-                   class="list-group-item list-group-item-action">
-                    <div class="d-flex justify-content-between">
-                        <span>{{ quest.title }}</span>
-                        <span class="badge bg-{% if quest.priority == 'critical' %}danger{% elif quest.priority == 'high' %}warning text-dark{% else %}secondary{% endif %}">
-                            {{ quest.get_priority_display }}
-                        </span>
+                   class="sq-card quest-row r-{{ quest.rarity }} p-3 d-flex justify-content-between align-items-start"
+                   style="text-decoration:none; border-radius:6px;">
+                    <div>
+                        <div style="color:var(--text-head); font-size:.85rem; margin-bottom:.25rem;">
+                            {{ quest.title }}
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span style="color:{{ quest.skill.color }}; font-size:.7rem;">{{ quest.skill.name }}</span>
+                            {% if quest.is_overdue %}
+                            <span style="color:var(--rose); font-size:.7rem;">прострочено</span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <small class="text-muted">
-                        {{ quest.skill.name }} &mdash; +{{ quest.calculate_xp }} XP
-                        {% if quest.is_overdue %}
-                            <span class="text-danger fw-bold">Прострочено</span>
-                        {% endif %}
-                    </small>
+                    <span class="text-gold" style="font-size:.78rem; white-space:nowrap;">+{{ quest.calculate_xp }} XP</span>
                 </a>
                 {% empty %}
-                <div class="list-group-item text-center text-muted py-3">
+                <div class="text-dim text-center py-4" style="font-size:.8rem;">
                     Немає активних квестів. <a href="{% url 'quest_create' %}">Створити?</a>
                 </div>
                 {% endfor %}
@@ -83,35 +115,66 @@
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Наближаються боси</h5>
+    <!-- Боси + Інвентар -->
+    <div class="col-md-6 d-flex flex-column gap-4">
+
+        <!-- Боси -->
+        <div class="sq-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Наближаються боси</span>
+                <a href="{% url 'boss_list' %}" class="btn-sq-ghost" style="font-size:.7rem; padding:.2rem .6rem;">Всі</a>
             </div>
-            <div class="list-group list-group-flush">
+            <div class="p-3 d-flex flex-column gap-3">
                 {% for boss in upcoming_bosses %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <strong>{{ boss.name }}</strong>
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span style="color:var(--text-head); font-size:.85rem;">{{ boss.name }}</span>
                         {% if boss.is_ready %}
-                            <span class="badge bg-success">Готовий</span>
+                        <span style="color:var(--emerald); font-size:.7rem;">готовий</span>
                         {% else %}
-                            <span class="badge bg-danger">Потрібен Lv. {{ boss.min_level }}</span>
+                        <span style="color:var(--rose); font-size:.7rem;">Lv.{{ boss.min_level }} потрібно</span>
                         {% endif %}
                     </div>
-                    <small class="text-muted">{{ boss.skill.name }} &mdash; залишилось {{ boss.days_left }} днів</small>
-                    <div class="progress mt-2" style="height: 5px;">
-                        <div class="progress-bar {% if boss.is_ready %}bg-success{% else %}bg-danger{% endif %}"
-                             style="width: {{ boss.level_progress_percent }}%;"></div>
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.7rem; color:var(--text-dim);">
+                        <span style="color:{{ boss.skill.color }};">{{ boss.skill.name }}</span>
+                        <span>{{ boss.days_left }} днів</span>
+                    </div>
+                    <div class="boss-progress">
+                        <div class="boss-progress-fill {% if boss.is_ready %}bg-emerald{% endif %}"
+                             style="width:{{ boss.level_progress_percent }}%;
+                                    background:{% if boss.is_ready %}var(--emerald){% else %}var(--rose){% endif %};">
+                        </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="list-group-item text-center text-muted py-3">
-                    Немає наближаючихся босів.
+                <div class="text-dim text-center py-2" style="font-size:.8rem;">Немає наближаючихся босів</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Інвентар (preview) -->
+        {% if items %}
+        <div class="sq-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Інвентар</span>
+                <a href="{% url 'inventory' %}" class="btn-sq-ghost" style="font-size:.7rem; padding:.2rem .6rem;">Всі</a>
+            </div>
+            <div class="p-3 d-flex flex-column gap-2">
+                {% for item in items %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span style="color:var(--text-head); font-size:.83rem;">{{ item.name }}</span>
+                        <span class="text-dim" style="font-size:.7rem; margin-left:.5rem;">x{{ item.quantity }}</span>
+                    </div>
+                    <a href="{% url 'inventory' %}" class="btn-sq-ghost" style="font-size:.7rem; padding:.15rem .5rem;">
+                        Використати
+                    </a>
                 </div>
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
+
     </div>
 
 </div>
