@@ -81,6 +81,7 @@ class Quest(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image = models.FileField(upload_to='quests/', blank=True, null=True)
 
     XP_MULTIPLIER = {
         'common': 1,

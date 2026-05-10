@@ -11,6 +11,7 @@ class QuestOwnerMixin:
         obj = super().get_object(queryset)
         if obj.user != self.request.user:
             raise PermissionDenied
+        
         return obj
 
 

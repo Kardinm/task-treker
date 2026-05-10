@@ -9,7 +9,7 @@
             <h5 class="mb-0">{% if form.instance.pk %}Редагувати квест{% else %}Новий квест{% endif %}</h5>
         </div>
         <div class="card-body">
-            <form method="post">
+            <form method="post", enctype="multipart/form-data">
                 {% csrf_token %}
                 {% for field in form %}
                 <div class="mb-3">

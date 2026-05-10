@@ -10,6 +10,11 @@
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
                     <h3>{{ quest.title }}</h3>
+
+                    {% if quest.image %}
+                        <img src="{{ quest.image.url }}" class="img-fluid rounded mb-3" alt="{{ quest.title }}">
+                    {% endif %}
+
                     <div class="d-flex flex-wrap gap-2 mb-2">
                         <span class="badge" style="background-color: {{ quest.skill.color }}">
                             {{ quest.skill.name }}

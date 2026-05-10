@@ -5,9 +5,8 @@ from .models import Quest, Comment, Skill
 class QuestForm(forms.ModelForm):
     class Meta:
         model = Quest
-        fields = [
-            'title', 'description', 'priority', 'rarity',
-            'deadline', 'skill', 'penalty_xp',
+        fields = ['title', 'description', 'priority', 'rarity', 
+                  'deadline', 'skill', 'penalty_xp', 'image'
         ]
         widgets = {
             'title': forms.TextInput(attrs={
@@ -30,6 +29,7 @@ class QuestForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Штраф XP за провал',
             }),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
 

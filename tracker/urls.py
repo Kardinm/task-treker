@@ -2,6 +2,9 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', auth_views.LoginView.as_view(
@@ -23,4 +26,4 @@ urlpatterns = [
     path('skills/<int:pk>/', views.SkillDetailView.as_view(), name='skill_detail'),
 
     path('bosses/', views.BossListView.as_view(), name='boss_list'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
