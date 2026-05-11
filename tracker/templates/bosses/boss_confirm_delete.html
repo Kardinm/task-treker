@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Видалити боса{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-5">
+    <div class="sq-card" style="border-color:rgba(244,63,94,.35);">
+        <div class="card-header" style="color:var(--rose);">Підтвердження видалення</div>
+        <div class="p-4">
+            <p style="font-size:.85rem; margin-bottom:1.5rem;">
+                Видалити боса <strong style="color:var(--text-head);">{{ boss.name }}</strong>?
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-sq-danger" style="flex:1;">Видалити</button>
+                    <a href="{% url 'boss_list' %}" class="btn-sq-ghost" style="flex:1; text-align:center;">
+                        Скасувати
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -19,7 +19,6 @@ class PlayerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='playerprofile')
     total_xp = models.PositiveIntegerField(default=0)
     player_level = models.PositiveIntegerField(default=1)
-    stamina = models.PositiveIntegerField(default=100)
     title = models.CharField(max_length=50, default='Новачок')
 
 
@@ -64,6 +63,10 @@ class Skill(models.Model):
     @property
     def xp_percent(self):
         return int((self.xp / self.xp_to_next_level) * 100)
+
+    @property
+    def completed_quests_count(self):
+        return self.quests.filter(status='completed').count()
 
     def __str__(self):
         return f'{self.name} (Lv.{self.level})'
@@ -149,7 +152,7 @@ class Boss(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bosses')
     name = models.CharField(max_length=200)
-    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='bosses')
     min_level = models.PositiveIntegerField(default=1)
     deadline = models.DateTimeField()
     description = models.TextField(blank=True)
@@ -171,6 +174,27 @@ class Boss(models.Model):
             return 100
         return min(100, int((self.skill.level / self.min_level) * 100))
 
+    @property
+    def completed_quests_count(self):
+        return Quest.objects.filter(user=self.user, skill=self.skill, status='completed').count()
+
+    @property
+    def quests_needed(self):
+        current = self.skill.level
+        needed_levels = max(0, self.min_level - current)
+        return needed_levels * 2
+
+    @property
+    def quests_remaining(self):
+        if self.is_ready:
+            return 0
+        needed_xp = 0
+        for lvl in range(self.skill.level, self.min_level):
+            needed_xp += 100 + (lvl - 1) * 50
+        avg_xp = 25
+        remaining = max(0, (needed_xp - self.skill.xp + avg_xp - 1) // avg_xp)
+        return remaining
+
     def __str__(self):
         return self.name
 
@@ -182,25 +206,32 @@ class Item(models.Model):
     ITEM_TYPES = [
         ('focus', 'Концентрація'),
         ('recovery', 'Відновлення'),
-        ('xp_boost', 'Буст XP'),
-        ('shield', 'Захист'),
+        ('planning', 'Планування'),
+        ('mindset', 'Мислення'),
+    ]
+    UNLOCK_LEVEL = [
+        (1, 'Lv.1'), (3, 'Lv.3'), (5, 'Lv.5'),
+        (8, 'Lv.8'), (12, 'Lv.12'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='items')
     name = models.CharField(max_length=100)
     item_type = models.CharField(max_length=20, choices=ITEM_TYPES)
-    description = models.TextField(default='')
-    effect_value = models.PositiveIntegerField(default=10)
-    quantity = models.PositiveIntegerField(default=1)
-    last_used = models.DateTimeField(null=True, blank=True)
+    description = models.TextField()
+    unlock_level = models.PositiveIntegerField(choices=UNLOCK_LEVEL, default=1)
 
-    def use(self):
-        if self.quantity > 0:
-            self.quantity -= 1
-            self.last_used = timezone.now()
-            self.save()
-            return True
-        return False
+    def is_unlocked_for(self, profile):
+        return profile.player_level >= self.unlock_level
 
     def __str__(self):
-        return f'{self.name} x{self.quantity}'
+        return self.name
+
+    class Meta:
+        ordering = ['unlock_level', 'item_type', 'name']
+
+
+class QuestItem(models.Model):
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name='quest_items')
+    item  = models.ForeignKey(Item, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('quest', 'item')

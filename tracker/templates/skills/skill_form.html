@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{% if form.instance.pk %}Редагувати навичку{% else %}Нова навичка{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+    <div class="sq-card">
+        <div class="card-header">
+            {% if form.instance.pk %}Редагувати навичку{% else %}Нова навичка{% endif %}
+        </div>
+        <div class="p-4">
+            <form method="post" class="d-flex flex-column gap-3">
+                {% csrf_token %}
+                {% for field in form %}
+                <div>
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div style="color:var(--rose); font-size:.72rem; margin-top:.25rem;">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div class="d-flex gap-2 mt-2">
+                    <button type="submit" class="btn-sq-primary" style="flex:1;">Зберегти</button>
+                    <a href="{% url 'skill_list' %}" class="btn-sq-ghost" style="flex:1; text-align:center;">Скасувати</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

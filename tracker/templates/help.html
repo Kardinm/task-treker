@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Довідка{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-8">
+
+    <div class="sq-card mb-4">
+        <div class="card-header">Довідка</div>
+        <div class="p-4">
+            <p class="text-dim" style="font-size:.85rem; line-height:1.7; margin-bottom:1.5rem;">
+                Короткий посібник з усіх аспектів трекера. Якщо щось незрозуміло — почни звідси.
+            </p>
+
+            <!-- Навички -->
+            <div class="mb-4">
+                <h5 style="font-family:'Cinzel',serif; color:var(--gold); font-size:.95rem; margin-bottom:.75rem;">
+                    Навички
+                </h5>
+                <p style="font-size:.83rem; color:var(--text); line-height:1.7; margin:0;">
+                    Навички — це теги для квестів. Кожна має назву та колір. За замовчуванням створюються
+                    три базові, але ти можеш додати свої власні на сторінці «Навички». Кожен квест
+                    прив'язується до однієї навички. Виконуючи квести, ти отримуєш XP у відповідну навичку
+                    і підвищуєш її рівень.
+                </p>
+            </div>
+
+            <hr class="divider" style="margin:1.25rem 0;">
+
+            <!-- Квести -->
+            <div class="mb-4">
+                <h5 style="font-family:'Cinzel',serif; color:var(--gold); font-size:.95rem; margin-bottom:.75rem;">
+                    Квести
+                </h5>
+                <p style="font-size:.83rem; color:var(--text); line-height:1.7; margin:0;">
+                    Квест = завдання. У нього є назва, опис, пріоритет, рідкість, дедлайн та навичка.
+                    <br><br>
+                    <strong>Пріоритет</strong> визначає базову нагороду XP:<br>
+                    <span style="color:var(--p-low);">Не треба</span> — 10 XP &nbsp;
+                    <span style="color:var(--p-medium);">Бажано</span> — 25 XP &nbsp;
+                    <span style="color:var(--p-high);">Треба</span> — 50 XP &nbsp;
+                    <span style="color:var(--p-critical);">Або зараз, або ніколи</span> — 100 XP
+                    <br><br>
+                    <strong>Рідкість</strong> множить нагороду:<br>
+                    <span style="color:var(--r-common);">Звичайний</span> ×1 &nbsp;
+                    <span style="color:var(--r-rare);">Нічогенький</span> ×2 &nbsp;
+                    <span style="color:var(--r-epic);">Напряжний</span> ×3 &nbsp;
+                    <span style="color:var(--r-legendary);">Дуже напряжний</span> ×5
+                    <br><br>
+                    Якщо пропустити дедлайн — квест стає простроченим. Можна встановити штраф XP за провал.
+                    До квесту можна додати нотатки та поради (див. нижче).
+                </p>
+            </div>
+
+            <hr class="divider" style="margin:1.25rem 0;">
+
+            <!-- Боси -->
+            <div class="mb-4">
+                <h5 style="font-family:'Cinzel',serif; color:var(--gold); font-size:.95rem; margin-bottom:.75rem;">
+                    Боси
+                </h5>
+                <p style="font-size:.83rem; color:var(--text); line-height:1.7; margin:0;">
+                    Бос = велика задача з дедлайном. Щоб «битися» з босом, потрібно досягти певного рівня
+                    навички. Система показує, скільки ще квестів цієї навички треба виконати, щоб набрати
+                    достатньо XP для потрібного рівня. Після перемоги отримуєш нагороду XP.
+                </p>
+            </div>
+
+            <hr class="divider" style="margin:1.25rem 0;">
+
+            <!-- Поради -->
+            <div class="mb-4">
+                <h5 style="font-family:'Cinzel',serif; color:var(--gold); font-size:.95rem; margin-bottom:.75rem;">
+                    Поради (Предмети)
+                </h5>
+                <p style="font-size:.83rem; color:var(--text); line-height:1.7; margin:0;">
+                    Поради — це не розхідники, а техніки та підказки.
+                    Вони поділяються на категорії: Концентрація, Відновлення, Планування, Мислення.
+                    Відкриваються автоматично при досягненні певного рівня профілю. Їх можна прикріпити
+                    до будь-якого квесту як нагадування, яке допоможе виконати завдання.
+                </p>
+            </div>
+
+            <hr class="divider" style="margin:1.25rem 0;">
+
+            <!-- Рівень профілю -->
+            <div class="mb-4">
+                <h5 style="font-family:'Cinzel',serif; color:var(--gold); font-size:.95rem; margin-bottom:.75rem;">
+                    Рівень та титули
+                </h5>
+                <p style="font-size:.83rem; color:var(--text); line-height:1.7; margin:0;">
+                    Рівень профілю = середній рівень усіх твоїх навичок. За рівнем присвоюється титул:<br>
+                    Lv.1 — Новачок &nbsp;|&nbsp;
+                    Lv.3 — Учень &nbsp;|&nbsp;
+                    Lv.5 — Практикант &nbsp;|&nbsp;
+                    Lv.8 — Знавець &nbsp;|&nbsp;
+                    Lv.12 — Майстер &nbsp;|&nbsp;
+                    Lv.18 — Ветеран &nbsp;|&nbsp;
+                    Lv.25 — Грандмайстер
+                </p>
+            </div>
+
+            <hr class="divider" style="margin:1.25rem 0;">
+
+            <!-- Як це працює -->
+            <div>
+                <h5 style="font-family:'Cinzel',serif; color:var(--gold); font-size:.95rem; margin-bottom:.75rem;">
+                    Як це працює
+                </h5>
+                <p style="font-size:.83rem; color:var(--text); line-height:1.7; margin:0;">
+                    1. Створюй навички (теги) під свої напрямки.<br>
+                    2. Створюй квести, прив'язуючи їх до навичок.<br>
+                    3. Виконуй квести — отримуй XP у навички та загальний XP.<br>
+                    4. Рівень навичок росте → росте рівень профілю → відкриваються нові поради.<br>
+                    5. Створюй босів (великі цілі) і виконуй достатньо квестів, щоб їх подолати.<br>
+                    6. Прикріплюй поради до квестів, щоб мати підказки під рукою.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}

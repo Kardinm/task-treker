@@ -37,7 +37,7 @@
                 </div>
                 <div class="col-4">
                     <div style="font-family:'Cinzel',serif; font-size:1.3rem; color:var(--emerald);">
-                        {{ skill.quests.filter.count|default:"—" }}
+                        {{ completed_count }}
                     </div>
                     <div class="text-dim">виконано</div>
                 </div>
@@ -50,6 +50,37 @@
             </div>
         </div>
     </div>
+
+    <!-- Боси цієї навички -->
+    {% if bosses %}
+    <div class="sq-card mb-4">
+        <div class="card-header">Боси цієї навички</div>
+        <div class="p-3 d-flex flex-column gap-2">
+            {% for boss in bosses %}
+            <div class="sq-card p-3" style="border-color: {% if boss.is_ready %}rgba(16,185,129,.35){% else %}rgba(244,63,94,.35){% endif %};">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span style="color:var(--text-head); font-size:.85rem;">{{ boss.name }}</span>
+                    <span style="font-size:.7rem;
+                          color:{% if boss.status == 'defeated' %}var(--emerald){% elif boss.status == 'lost' %}var(--rose){% else %}var(--text-dim){% endif %};">
+                        {{ boss.get_status_display }}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between" style="font-size:.72rem;">
+                    <span class="text-dim">Дедлайн: {{ boss.deadline|date:"d.m.Y" }}</span>
+                    <span class="{% if boss.is_ready %}text-emerald{% else %}text-rose{% endif %}">
+                        Lv.{{ skill.level }} / {{ boss.min_level }}
+                    </span>
+                </div>
+                {% if not boss.is_ready %}
+                <div class="mt-2" style="font-size:.72rem; color:var(--text-dim);">
+                    Потрібно ще квестів: <span style="color:var(--rose);">{{ boss.quests_remaining }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Квести навички -->
     <div class="sq-card">

@@ -4,6 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 style="font-size:1rem; margin:0;">Боси та дедлайни</h4>
+    <a href="{% url 'boss_create' %}" class="btn-sq-gold">+ Новий бос</a>
 </div>
 
 <div class="row g-4">
@@ -59,6 +60,19 @@
                     </div>
                 </div>
 
+                <!-- Квести до боса -->
+                {% if not boss.is_ready %}
+                <div class="mb-3 p-2" style="background:var(--bg-hover); border-radius:4px;">
+                    <div style="font-size:.72rem; color:var(--text-dim); margin-bottom:.25rem;">
+                        Прогрес до боса:
+                    </div>
+                    <div class="d-flex justify-content-between" style="font-size:.78rem;">
+                        <span>Виконано квестів: <span style="color:var(--text-head);">{{ boss.completed_quests_count }}</span></span>
+                        <span>Потрібно ще: <span style="color:var(--rose);">{{ boss.quests_remaining }}</span></span>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Часові рамки -->
                 <div class="d-flex justify-content-between" style="font-size:.72rem;">
                     <span class="text-dim">{{ boss.deadline|date:"d.m.Y, H:i" }}</span>
@@ -79,12 +93,45 @@
                     <span class="text-dim">Нагорода</span>
                     <span class="text-gold" style="font-family:'Cinzel',serif;">+{{ boss.reward_xp }} XP</span>
                 </div>
+
+                <!-- Дії -->
+                <div class="d-flex gap-2 mt-3">
+                    {% if boss.status == 'preparing' %}
+                        {% if boss.is_ready %}
+                        <form method="post" action="{% url 'boss_fight' boss.pk %}" style="margin:0; flex:1;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-sq-primary" style="width:100%;">
+                                ⚔ Битися
+                            </button>
+                        </form>
+                        {% else %}
+                        <div style="flex:1; text-align:center; color:var(--text-dim); font-size:.78rem;
+                                    border:1px solid var(--border); border-radius:4px; padding:.4rem;">
+                            Потрібен Lv.{{ boss.min_level }}
+                        </div>
+                        {% endif %}
+                    {% elif boss.status == 'defeated' %}
+                        <div style="flex:1; text-align:center; color:var(--emerald); font-size:.78rem;
+                                    border:1px solid rgba(16,185,129,.3); border-radius:4px; padding:.4rem;
+                                    background:rgba(16,185,129,.06);">
+                            Переможено
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'boss_update' boss.pk %}" class="btn-sq-ghost" style="font-size:.75rem; padding:.3rem .7rem;">
+                        Редагувати
+                    </a>
+                    <a href="{% url 'boss_delete' boss.pk %}" class="btn-sq-danger" style="font-size:.75rem; padding:.3rem .7rem;">
+                        Видалити
+                    </a>
+                </div>
             </div>
         </div>
     </div>
     {% empty %}
     <div class="col-12">
-        <div class="sq-card p-5 text-center text-dim">Немає босів</div>
+        <div class="sq-card p-5 text-center text-dim">
+            Немає босів. <a href="{% url 'boss_create' %}">Створити?</a>
+        </div>
     </div>
     {% endfor %}
 </div>

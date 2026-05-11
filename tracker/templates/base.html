@@ -13,16 +13,16 @@
         :root {
             --bg:        #080b14;
             --bg-card:   #0e1220;
-            --bg-hover:  #141826;
-            --border:    #1e2640;
+            --bg-hover:  #e1335c;
+            --border:    #464646;
             --gold:      #f59e0b;
             --gold-dim:  #92600a;
-            --indigo:    #6366f1;
+            --indigo:    #e1335c;
             --emerald:   #10b981;
             --rose:      #f43f5e;
             --sky:       #38bdf8;
             --text:      #cbd5e1;
-            --text-dim:  #475569;
+            --text-dim:  #adadad;
             --text-head: #e2e8f0;
 
             --r-common:    #64748b;
@@ -284,7 +284,7 @@
         }
 
         a { color: var(--indigo); text-decoration: none; }
-        a:hover { color: #818cf8; }
+        a:hover { color: #fa7979; }
 
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 6px; }
@@ -304,12 +304,17 @@
         <a class="nav-link" href="{% url 'skill_list' %}">Навички</a>
         <a class="nav-link" href="{% url 'boss_list' %}">Боси</a>
         <a class="nav-link" href="{% url 'inventory' %}">Інвентар</a>
+        <a class="nav-link" href="{% url 'help' %}">Довідка</a>
 
         <div class="ms-auto d-flex align-items-center gap-2">
             <span class="player-badge">
                 Lv.{{ user.playerprofile.player_level }} &nbsp;{{ user.playerprofile.title }}
             </span>
-            <a class="nav-link" href="{% url 'logout' %}">Вийти</a>
+            <form method="post" action="{% url 'logout' %}" style="margin:0; display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="nav-link" style="background:none; border:none; padding:.3rem .75rem; cursor:pointer;">
+                    Вийти</button>
+            </form>
         </div>
         {% else %}
         <div class="ms-auto d-flex gap-2">

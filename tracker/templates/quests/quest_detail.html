@@ -105,6 +105,66 @@
         </div>
     </div>
 
+    <!-- Поради (предмети) прикріплені до квесту -->
+    <div class="sq-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Поради ({{ quest_items.count }})</span>
+        </div>
+        <div class="p-4">
+            {% if quest_items %}
+            <div class="d-flex flex-column gap-2 mb-4">
+                {% for qi in quest_items %}
+                <div class="d-flex justify-content-between align-items-center p-2" style="background:var(--bg-hover); border-radius:4px;">
+                    <div>
+                        <span style="color:var(--text-head); font-size:.83rem;">{{ qi.item.name }}</span>
+                        <span style="font-size:.68rem; color:var(--text-dim); margin-left:.5rem;">
+                            {% if qi.item.item_type == 'focus' %}Концентрація
+                            {% elif qi.item.item_type == 'recovery' %}Відновлення
+                            {% elif qi.item.item_type == 'planning' %}Планування
+                            {% elif qi.item.item_type == 'mindset' %}Мислення
+                            {% endif %}
+                        </span>
+                    </div>
+                    <form method="post" action="{% url 'remove_item_from_quest' quest.pk qi.item.pk %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-sq-danger" style="padding:.1rem .45rem; font-size:.68rem; border-radius:3px;">
+                            ×
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-dim text-center py-2 mb-3" style="font-size:.8rem;">
+                Немає прикріплених порад
+            </div>
+            {% endif %}
+
+            <hr class="divider" style="margin:1rem 0;">
+
+            <!-- Додати пораду -->
+            {% if available_items %}
+            <div style="font-size:.75rem; color:var(--text-dim); margin-bottom:.5rem;">
+                Додати пораду до квесту:
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for item in available_items %}
+                <form method="post" action="{% url 'add_item_to_quest' quest.pk item.pk %}" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-sq-ghost" style="font-size:.72rem; padding:.25rem .6rem;">
+                        + {{ item.name }}
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-dim text-center" style="font-size:.78rem;">
+                Немає доступних порад (відкриваються з рівнями)
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Нотатки -->
     <div class="sq-card">
         <div class="card-header">Нотатки ({{ notes.count }})</div>

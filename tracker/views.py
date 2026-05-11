@@ -10,8 +10,8 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 
-from .models import Quest, Skill, Boss, PlayerProfile, Note, Item
-from .forms import QuestForm, NoteForm, QuestFilterForm
+from .models import Quest, Skill, Boss, PlayerProfile, Note, Item, QuestItem
+from .forms import QuestForm, NoteForm, QuestFilterForm, SkillForm, BossForm
 from .mixins import OwnerQuerysetMixin, QuestOwnerMixin, XPAwardMixin
 
 
@@ -24,25 +24,11 @@ class RegisterView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         PlayerProfile.objects.create(user=self.object)
-        Skill.objects.create(user=self.object, name='Python',    color='#f59e0b')
+        Skill.objects.create(user=self.object, name='Python', color='#f59e0b')
         Skill.objects.create(user=self.object, name='Англійська', color='#6366f1')
         Skill.objects.create(user=self.object, name='Математика', color='#ef4444')
-        Item.objects.create(
-            user=self.object, name='Pomodoro',
-            item_type='focus',
-            description='25 хвилин роботи → 5 хвилин перерви. Повтори 4 рази — потім велика пауза 20 хв.',
-            effect_value=25, quantity=5,
-        )
-        Item.objects.create(
-            user=self.object, name='Прогулянка',
-            item_type='recovery',
-            description='Вийди на 10–15 хвилин. Рух допомагає мозку.',
-            effect_value=15, quantity=3,
-        )
         login(self.request, self.object)
         return response
-
-
 
 
 
@@ -67,14 +53,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             Quest.objects.filter(user=user, status='completed')
             .order_by('-completed_at')[:5]
         )
-        context['items'] = Item.objects.filter(user=user, quantity__gt=0)[:4]
 
         profile, _ = PlayerProfile.objects.get_or_create(user=user)
         profile.update_level()
         context['profile'] = profile
 
         return context
-
 
 
 
@@ -115,6 +99,12 @@ class QuestDetailView(LoginRequiredMixin, QuestOwnerMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['notes'] = self.object.notes.select_related('user').all()
         context['note_form'] = NoteForm()
+
+        profile = self.request.user.playerprofile
+        all_items = Item.objects.all()
+        context['available_items'] = [item for item in all_items if item.is_unlocked_for(profile)]
+        context['quest_items'] = self.object.quest_items.select_related('item').all()
+
         return context
 
 
@@ -163,7 +153,6 @@ class QuestDeleteView(LoginRequiredMixin, QuestOwnerMixin, DeleteView):
 
 
 
-
 class CompleteQuestView(LoginRequiredMixin, XPAwardMixin, View):
     def post(self, request, pk):
         quest = get_object_or_404(Quest, pk=pk, user=request.user)
@@ -174,7 +163,6 @@ class CompleteQuestView(LoginRequiredMixin, XPAwardMixin, View):
         quest.completed_at = timezone.now()
         quest.save()
         return redirect('quest_detail', pk=pk)
-
 
 
 
@@ -203,8 +191,6 @@ class DeleteNoteView(LoginRequiredMixin, View):
 
 
 
-
-
 class SkillListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     model = Skill
     template_name = 'skills/skill_list.html'
@@ -220,8 +206,26 @@ class SkillDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
         context['quests'] = (
             self.object.quests.order_by('-created_at').select_related('user')[:10]
         )
+        context['completed_count'] = self.object.quests.filter(status='completed').count()
+        context['bosses'] = self.object.bosses.filter(status='preparing').order_by('deadline')
         return context
 
+
+class SkillCreateView(LoginRequiredMixin, CreateView):
+    model = Skill
+    form_class = SkillForm
+    template_name = 'skills/skill_form.html'
+    success_url = reverse_lazy('skill_list')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class SkillDeleteView(LoginRequiredMixin, OwnerQuerysetMixin, DeleteView):
+    model = Skill
+    template_name = 'skills/skill_confirm_delete.html'
+    success_url = reverse_lazy('skill_list')
 
 
 
@@ -232,6 +236,59 @@ class BossListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     context_object_name = 'bosses'
 
 
+class BossCreateView(LoginRequiredMixin, CreateView):
+    model = Boss
+    form_class = BossForm
+    template_name = 'bosses/boss_form.html'
+    success_url = reverse_lazy('boss_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class BossUpdateView(LoginRequiredMixin, OwnerQuerysetMixin, UpdateView):
+    model = Boss
+    form_class = BossForm
+    template_name = 'bosses/boss_form.html'
+    success_url = reverse_lazy('boss_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+
+class BossDeleteView(LoginRequiredMixin, OwnerQuerysetMixin, DeleteView):
+    model = Boss
+    template_name = 'bosses/boss_confirm_delete.html'
+    success_url = reverse_lazy('boss_list')
+
+
+class BossFightView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        boss = get_object_or_404(Boss, pk=pk, user=request.user)
+
+        if not boss.is_ready:
+            return redirect('boss_list')
+
+        if boss.status == 'defeated':
+            return redirect('boss_list')
+
+        profile = request.user.playerprofile
+        profile.total_xp += boss.reward_xp
+        profile.update_level()
+
+        boss.status = 'defeated'
+        boss.save()
+
+        return redirect('boss_list')
+
 
 
 
@@ -241,11 +298,38 @@ class InventoryView(LoginRequiredMixin, ListView):
     context_object_name = 'items'
 
     def get_queryset(self):
-        return Item.objects.filter(user=self.request.user).order_by('item_type', 'name')
+        return Item.objects.all().order_by('unlock_level', 'item_type')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = self.request.user.playerprofile
+        context['player_level'] = profile.player_level
+        context['unlocked_items'] = [item for item in context['items'] if item.is_unlocked_for(profile)]
+        context['locked_items'] = [item for item in context['items'] if not item.is_unlocked_for(profile)]
+        return context
 
 
-class UseItemView(LoginRequiredMixin, View):
-    def post(self, request, pk):
-        item = get_object_or_404(Item, pk=pk, user=request.user)
-        item.use()
-        return redirect('inventory')
+class AddItemToQuestView(LoginRequiredMixin, View):
+    def post(self, request, quest_pk, item_pk):
+        quest = get_object_or_404(Quest, pk=quest_pk, user=request.user)
+        item = get_object_or_404(Item, pk=item_pk)
+
+        profile = request.user.playerprofile
+        if not item.is_unlocked_for(profile):
+            raise PermissionDenied
+
+        QuestItem.objects.get_or_create(quest=quest, item=item)
+        return redirect('quest_detail', pk=quest_pk)
+
+
+class RemoveItemFromQuestView(LoginRequiredMixin, View):
+    def post(self, request, quest_pk, item_pk):
+        quest = get_object_or_404(Quest, pk=quest_pk, user=request.user)
+        item = get_object_or_404(Item, pk=item_pk)
+
+        QuestItem.objects.filter(quest=quest, item=item).delete()
+        return redirect('quest_detail', pk=quest_pk)
+
+
+class HelpView(LoginRequiredMixin, TemplateView):
+    template_name = 'help.html'
