@@ -23,10 +23,20 @@ class PlayerProfile(models.Model):
 
 
     def update_level(self):
-        avg = Skill.objects.filter(user=self.user).aggregate(avg=Avg('level'))['avg']
-        self.player_level = max(1, int(avg or 1))
+        xp = self.total_xp
+        level = 1
+        while xp >= self._xp_for_level(level + 1):
+            level += 1
+        self.player_level = level
         self.title = self._compute_title(self.player_level)
         self.save()
+
+    @staticmethod
+    def _xp_for_level(level):
+        if level <= 1:
+            return 0
+        n = level - 1
+        return n * (200 + (n - 1) * 50) // 2
 
 
     def _compute_title(self, level):
@@ -186,6 +196,7 @@ class Boss(models.Model):
 
     @property
     def quests_remaining(self):
+        """Скільки ще квестів треба пройти, щоб досягти потрібного рівня"""
         if self.is_ready:
             return 0
         needed_xp = 0
